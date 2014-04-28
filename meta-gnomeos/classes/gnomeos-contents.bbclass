@@ -1,44 +1,26 @@
 #
 # Copyright (C) 2011 Colin Walters <walters@verbum.org>
 #
-LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3b58 \
-                    file://${COREBASE}/meta/COPYING.MIT;md5=3da9cfbcb788c80a0384361b4de20420"
-
-inherit rootfs_${IMAGE_PKGTYPE}
+inherit image
+inherit image_types
 
 PACKAGE_INSTALL += " \
 		task-gnomeos-contents-runtime \
 		ldd \
-		libltdl7 \
-		libicule50 \
 		"
 
 DEPENDS += "task-gnomeos-contents-runtime makedevs-native \
 	virtual/fakeroot-native \
 	"
 
-EXCLUDE_FROM_WORLD = "1"
-
-do_rootfs[nostamp] = "1"
-do_rootfs[dirs] = "${TOPDIR}"
-do_rootfs[lockfiles] += "${IMAGE_ROOTFS}.lock"
-do_build[nostamp] = "1"
 do_rootfs[umask] = "022"
 
-def gnomeos_get_devtable_list(d):
-    return bb.which(d.getVar('BBPATH', 1), 'files/device_table-minimal.txt')
+IMAGE_FSTYPES = "tar.gz"
 
 # Must call real_do_rootfs() from inside here, rather than as a separate
 # task, so that we have a single fakeroot context for the whole process.
-fakeroot do_rootfs () {
-        set -x
-	rm -rf ${IMAGE_ROOTFS}
-	rm -rf ${MULTILIB_TEMP_ROOTFS}
-	mkdir -p ${IMAGE_ROOTFS}
-	mkdir -p ${DEPLOY_DIR_IMAGE}
-
-	rootfs_${IMAGE_PKGTYPE}_do_rootfs
+fakeroot prepare_rootfs () {
+    set -x
 
 	# Delete all of the legacy sysvinit scripts; we use systemd
 	rm -rf ${IMAGE_ROOTFS}/etc/init.d
@@ -175,16 +157,16 @@ EOF
 	ln -s ../lib/systemd/systemd ${IMAGE_ROOTFS}/usr/bin/init
 
 	rm -rf ${WORKDIR}/contents
-	mkdir ${WORKDIR}/contents
+	mkdir -m 0755 ${WORKDIR}/contents
         cd ${WORKDIR}/contents
 
 	# The default toplevel directories used as mount targets
 	for d in dev proc run sys var; do
-	    mkdir $d
+	    mkdir -m 0755 $d
 	done
 
 	# Special ostree mount
-	mkdir sysroot
+	mkdir -m 0755 sysroot
 
 	# Some FHS targets; these all live in /var
 	ln -s var/opt opt
@@ -234,29 +216,26 @@ EOF
 	mv ${DEST} ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME_NODATE}
 }
 
+fakeroot remove_symlinks () {
+	set -x
+	echo ${DEPLOY_DIR_IMAGE}
+	echo ${WORKDIR}
+	echo ${IMAGE_ROOTFS}
+	rm -rf ${DEPLOY_DIR_IMAGE}/${IMAGE_BASENAME}-${MACHINE}.tar.gz
+}
+
+IMAGE_PREPROCESS_COMMAND += "remove_symlinks;"
+IMAGE_POSTPROCESS_COMMAND += "prepare_rootfs;"
+
 log_check() {
 	true
 }
 
-do_fetch[noexec] = "1"
-do_unpack[noexec] = "1"
-do_patch[noexec] = "1"
-do_configure[noexec] = "1"
-do_compile[noexec] = "1"
-do_install[noexec] = "1"
-do_populate_sysroot[noexec] = "1"
-do_package[noexec] = "1"
-do_package_write_ipk[noexec] = "1"
-do_package_write_deb[noexec] = "1"
-do_package_write_rpm[noexec] = "1"
-
-addtask rootfs before do_build
-
 # stub out for now
-rootfs_install_all_locales () {
-    true
-}
+#rootfs_install_all_locales () {
+#    true
+#}
 
-rootfs_install_complementary () {
-    true
-}
+#rootfs_install_complementary () {
+#    true
+#}
