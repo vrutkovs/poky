@@ -2,4 +2,6 @@ meta
 meta-yocto
 meta-yocto-bsp
 meta-oe/meta-networking
+meta-oe/meta-oe
+meta-oe/meta-ruby
 meta-gnomeos
