@@ -92,7 +92,6 @@ RDEPENDS_${PN} += "     \
 	 cracklib-dev \
 	 e2fsprogs-dev \
 	 krb5-dev \
-         llvm-dev \
 	 boost-dev \
 	 libsqlite3-dev \
 	 expat-dev \
