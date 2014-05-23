@@ -7,6 +7,8 @@ inherit image_types
 PACKAGE_INSTALL += " \
 		task-gnomeos-contents-runtime \
 		ldd \
+		libtool \
+		icu \
 		"
 
 DEPENDS += "task-gnomeos-contents-runtime makedevs-native \
