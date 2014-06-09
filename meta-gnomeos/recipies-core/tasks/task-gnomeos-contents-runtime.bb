@@ -122,4 +122,7 @@ RDEPENDS_${PN} += "\
          syslinux-mbr \
          syslinux-misc \
 	 cyrus-sasl \
+	 gcov \
+	 gcov-symlinks \
+	 lcov \
 	 "

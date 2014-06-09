@@ -100,4 +100,5 @@ RDEPENDS_${PN} += "     \
 	 texinfo \
 	 python-pyparsing \
 	 cyrus-sasl-dev \
+	 libgcov-dev \
 	 "
